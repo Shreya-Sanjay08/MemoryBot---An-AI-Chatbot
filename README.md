@@ -164,4 +164,4 @@ MIT — free to use, modify, and build on.
  
 ---
  
-> Built by [Your Name](https://github.com/YOUR_USERNAME) · BEng CSE · Middlesex University Dubai
+> Built by Shreya Sanjay (https://github.com/Shreya-Sanjay08) · BEng CSE · Middlesex University Dubai
