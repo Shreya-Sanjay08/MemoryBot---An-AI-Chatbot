@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MemoryBot — AI Chatbot with Memory</title>
+  <link rel="stylesheet" href="css/style.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet" />
+</head>
+<body>
+ 
+  <!-- HEADER -->
+  <header class="header">
+    <div class="logo">
+      <div class="logo-dot">M</div>
+      <span class="logo-text">MemoryBot</span>
+      <span class="logo-badge">v2.0</span>
+    </div>
+    <div class="header-actions">
+      <button class="btn-icon" title="Toggle sidebar" onclick="toggleSidebar()">&#9776;</button>
+      <button class="btn-icon" title="Configure provider" onclick="toggleConfig()">&#9881;</button>
+    </div>
+  </header>
+ 
+  <!-- CONFIG PANEL -->
+  <div id="config-panel" class="config-panel hidden">
+ 
+    <div class="config-grid">
+ 
+      <!-- LEFT: Provider picker -->
+      <div>
+        <label class="field-label">PROVIDER</label>
+        <select id="provider-select" onchange="onProviderChange()">
+          <option value="ollama">🖥  Ollama (Local — Free &amp; Infinite)</option>
+          <option value="groq">⚡ Groq (Free Tier — Fast)</option>
+          <option value="openrouter">🌐 OpenRouter (Free Models)</option>
+          <option value="anthropic">🟠 Anthropic Claude (Paid)</option>
+          <option value="openai">🟢 OpenAI (Paid)</option>
+        </select>
+        <div id="provider-badge" class="provider-badge free">∞ Free &amp; Local</div>
+ 
+        <div style="margin-top:12px;">
+          <label class="field-label">MODEL</label>
+          <input type="text" id="model-input" value="llama3.2" />
+          <div class="field-hint" id="model-hint">e.g. llama3.2, mistral, gemma2, phi3</div>
+        </div>
+      </div>
+ 
+      <!-- RIGHT: Key + URL -->
+      <div>
+        <div id="url-group">
+          <label class="field-label">OLLAMA URL</label>
+          <input type="text" id="url-input" value="http://localhost:11434" />
+          <div class="field-hint">Default: http://localhost:11434</div>
+        </div>
+ 
+        <div id="key-group" style="display:none;">
+          <label class="field-label">API KEY</label>
+          <input type="password" id="key-input" placeholder="Paste your key here..." />
+          <div class="field-hint">Never stored — memory only</div>
+        </div>
+ 
+        <div class="ollama-tip" id="ollama-tip">
+          <strong>Ollama setup:</strong><br/>
+          1. Install: <a href="https://ollama.com" target="_blank">ollama.com</a><br/>
+          2. Pull a model: <code>ollama pull llama3.2</code><br/>
+          3. Start server: <code>ollama serve</code>
+        </div>
+      </div>
+    </div>
+ 
+    <button class="save-btn" onclick="saveConfig()">Connect</button>
+  </div>
+ 
+  <!-- LAYOUT -->
+  <div class="layout">
+ 
+    <!-- SIDEBAR -->
+    <aside class="sidebar" id="sidebar">
+      <div class="scrollable-sidebar">
+ 
+        <div class="sidebar-section">
+          <div class="sidebar-label">Personality</div>
+          <div class="persona-grid">
+            <button class="persona-btn active" onclick="setPersona(this,'assistant','A helpful, professional AI assistant.')">&#129302; Assistant</button>
+            <button class="persona-btn" onclick="setPersona(this,'tutor','A patient, encouraging tutor who explains things clearly with examples.')">&#128218; Tutor</button>
+            <button class="persona-btn" onclick="setPersona(this,'friend','A casual, witty friend who keeps things light and fun.')">&#128516; Friend</button>
+            <button class="persona-btn" onclick="setPersona(this,'expert','A precise, technical expert who gives detailed, accurate answers.')">&#128302; Expert</button>
+            <button class="persona-btn" onclick="setPersona(this,'coach','A motivating life coach who gives actionable advice.')">&#127919; Coach</button>
+            <button class="persona-btn" onclick="setPersona(this,'creative','A creative, imaginative partner who thinks outside the box.')">&#127912; Creative</button>
+          </div>
+        </div>
+ 
+        <div class="sidebar-section">
+          <div class="sidebar-label">Session</div>
+          <div class="stat-row"><span class="stat-label">Messages</span><span class="stat-val" id="stat-msgs">0</span></div>
+          <div class="stat-row"><span class="stat-label">Persona</span><span class="stat-val" id="stat-persona">assistant</span></div>
+          <div class="stat-row"><span class="stat-label">Context depth</span><span class="stat-val" id="stat-ctx">0 turns</span></div>
+          <div class="stat-row"><span class="stat-label">API calls</span><span class="stat-val" id="stat-calls">0</span></div>
+        </div>
+ 
+        <div class="sidebar-section">
+          <div class="sidebar-label">Memory pins</div>
+          <div class="memory-list" id="memory-list">
+            <div class="no-memory">No memories yet</div>
+          </div>
+          <div style="margin-top:8px;">
+            <input type="text" id="memory-input" placeholder="Pin something to remember..." style="margin-bottom:6px;" />
+            <button class="action-btn" onclick="pinMemory()">
+              <span class="dot" style="background:var(--accent);"></span> Pin memory
+            </button>
+          </div>
+        </div>
+ 
+        <div class="sidebar-section">
+          <div class="sidebar-label">Actions</div>
+          <button class="action-btn" onclick="exportChat()"><span class="dot" style="background:var(--green);"></span> Export chat (.txt)</button>
+          <button class="action-btn" onclick="exportJSON()"><span class="dot" style="background:var(--accent2);"></span> Export as JSON</button>
+          <button class="action-btn danger" onclick="clearChat()"><span class="dot" style="background:var(--red);"></span> Clear conversation</button>
+        </div>
+ 
+      </div>
+    </aside>
+ 
+    <!-- CHAT -->
+    <main class="chat-area">
+      <div class="context-bar">
+        <div class="context-chip"><div class="indicator" id="status-dot" style="background:var(--amber);"></div><span id="status-text">Select provider (⚙)</span></div>
+        <div class="context-chip"><div class="indicator" style="background:var(--accent);"></div><span id="ctx-chip">0 msgs in context</span></div>
+        <div class="context-chip" id="persona-chip">&#129302; assistant</div>
+        <div class="context-chip" id="provider-chip">&#9889; Ollama (Local)</div>
+      </div>
+ 
+      <div class="messages" id="messages">
+        <div class="empty-state" id="empty-state">
+          <div class="empty-icon">&#128172;</div>
+          <div class="empty-title">Start a conversation</div>
+          <div class="empty-sub">Click ⚙ to pick a provider, then start chatting</div>
+          <div class="starter-grid">
+            <div class="starter" onclick="sendStarter(this)">Explain neural networks</div>
+            <div class="starter" onclick="sendStarter(this)">Help me debug Python</div>
+            <div class="starter" onclick="sendStarter(this)">What should I learn in AI?</div>
+            <div class="starter" onclick="sendStarter(this)">Tell me a fun fact</div>
+          </div>
+        </div>
+      </div>
+ 
+      <div class="input-area">
+        <div class="input-row">
+          <textarea id="msg-input" placeholder="Message MemoryBot..." rows="1"
+            onkeydown="handleKey(event)" oninput="autoResize(this)"></textarea>
+          <button class="send-btn" id="send-btn" onclick="sendMessage()">&#9654;</button>
+        </div>
+        <div class="input-hint">Enter to send &middot; Shift+Enter for new line &middot; Full history sent with each message</div>
+      </div>
+    </main>
+  </div>
+ 
+  <div class="notif hidden" id="notif">
+    <span id="notif-icon">&#10003;</span>
+    <span id="notif-text">Done</span>
+  </div>
+ 
+  <script src="js/app.js"></script>
+</body>
+</html>
