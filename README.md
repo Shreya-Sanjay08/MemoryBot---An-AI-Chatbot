@@ -1,141 +1,167 @@
 # MemoryBot 🤖
+### Multi-provider AI Chatbot with Conversation Memory
  
-An AI chatbot with persistent conversation memory, personality customisation, and chat log export. Built with vanilla HTML/CSS/JS and the Anthropic Claude API.
+> Portfolio project — BEng Computer Science & Engineering · Middlesex University Dubai
  
-> **Portfolio project** — BEng CSE · Middlesex University Dubai
+![Version](https://img.shields.io/badge/version-2.0-7c6af7)
+![License](https://img.shields.io/badge/license-MIT-34d399)
+![Providers](https://img.shields.io/badge/providers-5-a78bfa)
  
 ---
  
-## Features
+## 🖥 Live Demo
+🔗 [memorybot.vercel.app](https://memorybot.vercel.app) <!-- update this after deploying -->
  
-- **Conversation memory** — full history sent with every API call so the AI always remembers context
-- **6 personality presets** — Assistant, Tutor, Friend, Expert, Coach, Creative (system prompt injection)
-- **Pinned memories** — manually add facts the bot should always remember
-- **Export chat logs** — download as `.txt` or `.json`
-- **Session stats** — live message count, API call counter, context depth
-- **No build step** — pure HTML/CSS/JS, open in browser or serve statically
 ---
  
-## Folder Structure
+## 📌 What is MemoryBot?
+ 
+MemoryBot is an AI chatbot that remembers your entire conversation. Unlike basic chatbots that forget context between messages, MemoryBot maintains a full conversation history and sends it with every API request — the same pattern used in production LLM applications like ChatGPT.
+ 
+It supports 5 different AI providers including **Ollama** for completely free, local, offline inference.
+ 
+---
+ 
+## ✨ Features
+ 
+- 💬 **Conversation memory** — full history sent with every request so the AI never loses context
+- ⚡ **Multi-provider support** — swap between 5 AI backends from one config panel
+- 🎭 **6 personality presets** — Assistant, Tutor, Friend, Expert, Coach, Creative
+- 📌 **Pinned memories** — manually inject facts the AI should always remember
+- 📄 **Export chat logs** — download conversations as `.txt` or `.json`
+- 📊 **Session stats** — live message count, API call counter, context depth tracker
+- 🖥 **No build step** — pure HTML, CSS, and JavaScript
+---
+ 
+## 🤖 Supported Providers
+ 
+| Provider | Cost | Speed | Notes |
+|---|---|---|---|
+| [Ollama](https://ollama.com) | ✅ Free & local | Fast | Runs 100% offline on your machine |
+| [Groq](https://groq.com) | ✅ Free tier | Very fast | Cloud inference, generous free limits |
+| [OpenRouter](https://openrouter.ai) | ✅ Free models | Fast | Access to many free open-source models |
+| [Anthropic](https://anthropic.com) | 💳 Paid | Fast | Claude models |
+| [OpenAI](https://openai.com) | 💳 Paid | Fast | GPT models |
+ 
+---
+ 
+## 🚀 Quick Start
+ 
+### Option 1 — Ollama (Free, Local, Recommended)
+ 
+```bash
+# 1. Install Ollama from https://ollama.com
+ 
+# 2. Pull a model
+ollama pull llama3.2:1b      # lightweight — works on any machine
+# or
+ollama pull llama3.2         # full model — needs 8GB+ VRAM
+ 
+# 3. Start the server
+ollama serve
+```
+ 
+Then open the app, click **⚙**, select **Ollama**, and hit **Connect** — no API key needed.
+ 
+### Option 2 — Groq (Free Cloud)
+ 
+1. Sign up at [console.groq.com](https://console.groq.com) and grab a free API key
+2. Open the app, click **⚙**, select **Groq**
+3. Paste your key and click **Connect**
+### Option 3 — Run locally with VS Code
+ 
+1. Clone the repo
+   ```bash
+   git clone https://github.com/YOUR_USERNAME/memorybot.git
+   cd memorybot
+   ```
+2. Open the folder in VS Code (`File → Open Folder`)
+3. Install the **Live Server** extension
+4. Right-click `index.html` → **Open with Live Server**
+5. App opens at `http://127.0.0.1:5500`
+---
+ 
+## 📁 Project Structure
  
 ```
 memorybot/
-├── index.html        ← Main app shell
+├── index.html        ← App shell and UI markup
 ├── css/
-│   └── style.css     ← All styles (dark theme, layout, components)
+│   └── style.css     ← Dark theme, layout, all component styles
 ├── js/
-│   └── app.js        ← All logic (API calls, state, export)
+│   └── app.js        ← API adapters, state management, chat logic
 ├── .gitignore
 └── README.md
 ```
  
 ---
  
-## Quick Start
+## 🧠 How the Memory Works
  
-### Option 1 — Open directly (easiest)
-```bash
-# Just open index.html in your browser — no server needed
-open index.html          # macOS
-start index.html         # Windows
-xdg-open index.html      # Linux
-```
- 
-### Option 2 — VS Code Live Server (recommended)
-1. Install the **Live Server** extension in VS Code
-2. Right-click `index.html` → **Open with Live Server**
-3. App opens at `http://127.0.0.1:5500`
-### Option 3 — Python simple server
-```bash
-cd memorybot
-python -m http.server 8000
-# Open http://localhost:8000
-```
- 
----
- 
-## Setup
- 
-1. Get an API key from [console.anthropic.com](https://console.anthropic.com)
-2. Open the app, click the **⚙** icon (top right)
-3. Paste your key (`sk-ant-...`) and click **Save & Connect**
-4. Start chatting!
-> ⚠️ The API key is stored in memory only and is never persisted to disk or sent anywhere except `api.anthropic.com`.
- 
----
- 
-## How the Memory Works
+The "memory" is simply the full conversation history sent to the API with every request:
  
 ```js
-// Every message is appended to the history array
+// Every message is appended to history
 history.push({ role: 'user', content: userMessage });
  
-// The FULL history is sent with every API request
+// Full history is sent with each API call
 body: JSON.stringify({
-  model: 'claude-sonnet-4-20250514',
+  model: 'llama3.2:1b',
   system: systemPrompt,   // personality + pinned memories
-  messages: history       // ← this is the "memory"
+  messages: history       // ← this is the memory
 })
  
-// The reply is added back to history
+// Reply is added back to history
 history.push({ role: 'assistant', content: reply });
 ```
  
-This is the standard "context window" memory pattern used in production LLM applications.
+This is the standard **context window memory** pattern used in all major LLM applications.
  
 ---
  
-## Personality Customisation
+## 🔌 Provider Architecture
  
-Each persona injects a different system prompt:
+Each AI provider has a different API shape. MemoryBot uses an adapter pattern to normalise them:
  
-| Preset    | System prompt |
-|-----------|---------------|
-| Assistant | A helpful, professional AI assistant. |
-| Tutor     | A patient, encouraging tutor who explains with examples. |
-| Friend    | A casual, witty friend who keeps things light and fun. |
-| Expert    | A precise, technical expert who gives detailed answers. |
-| Coach     | A motivating life coach who gives actionable advice. |
-| Creative  | An imaginative partner who thinks outside the box. |
- 
----
- 
-## Tech Stack
- 
-| Layer     | Technology |
-|-----------|-----------|
-| Frontend  | HTML5, CSS3, Vanilla JS (ES2020) |
-| AI        | Anthropic Claude API (`claude-sonnet-4-20250514`) |
-| Fonts     | Syne + JetBrains Mono (Google Fonts) |
-| Hosting   | Any static host (GitHub Pages, Netlify, Vercel) |
- 
----
- 
-## Next Steps (to extend the project)
- 
-- [ ] Add a Python/Flask backend with SQLite to persist chats across sessions
-- [ ] Implement LangChain `ConversationSummaryMemory` to handle very long histories
-- [ ] Add Ollama support for 100% local inference
-- [ ] Deploy to GitHub Pages or Netlify
-- [ ] Add streaming responses (Server-Sent Events)
-- [ ] Multi-session support with named conversations
----
- 
-## Deploying to GitHub Pages
- 
-```bash
-git init
-git add .
-git commit -m "Initial commit — MemoryBot"
-git branch -M main
-git remote add origin https://github.com/YOUR_USERNAME/memorybot.git
-git push -u origin main
+```js
+async function callAPI(systemPrompt, messages) {
+  switch (config.provider) {
+    case 'ollama':     return callOllama(systemPrompt, messages);
+    case 'groq':       return callOpenAICompat(systemPrompt, messages, GROQ_URL);
+    case 'openrouter': return callOpenAICompat(systemPrompt, messages, OR_URL);
+    case 'openai':     return callOpenAICompat(systemPrompt, messages, OAI_URL);
+    case 'anthropic':  return callAnthropic(systemPrompt, messages);
+  }
+}
 ```
  
-Then in GitHub → Settings → Pages → Source: **Deploy from branch (main)**
+---
+ 
+## 🛠 Tech Stack
+ 
+| Layer | Technology |
+|---|---|
+| Frontend | HTML5, CSS3, Vanilla JavaScript (ES2020) |
+| AI (local) | Ollama — `llama3.2`, `mistral`, `gemma2`, `phi3` |
+| AI (cloud) | Anthropic, OpenAI, Groq, OpenRouter |
+| Fonts | Syne + JetBrains Mono via Google Fonts |
+| Hosting | Vercel / GitHub Pages |
  
 ---
  
-## License
+## 🗺 Roadmap
  
-MIT — free to use, modify, and distribute.
+- [ ] Python/Flask backend with SQLite for persistent chat history across sessions
+- [ ] LangChain `ConversationSummaryMemory` for smarter long-context handling
+- [ ] Streaming responses via Server-Sent Events
+- [ ] Named conversation sessions
+- [ ] Dark/light theme toggle
+---
+ 
+## 📄 License
+ 
+MIT — free to use, modify, and build on.
+ 
+---
+ 
+> Built by [Your Name](https://github.com/YOUR_USERNAME) · BEng CSE · Middlesex University Dubai
