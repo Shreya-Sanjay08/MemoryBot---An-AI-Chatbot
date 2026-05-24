@@ -10,7 +10,7 @@
 ---
  
 ## 🖥 Live Demo
-🔗 [memorybot.vercel.app](https://memorybot.vercel.app) <!-- update this after deploying -->
+🔗 [memorybot.vercel.app](https://memory-bot-an-ai-chatbot.vercel.app/) <!-- update this after deploying -->
  
 ---
  
